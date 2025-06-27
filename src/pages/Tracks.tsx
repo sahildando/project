@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Clock, Zap, Eye, Calendar, Trophy, Flag } from 'lucide-react';
+import { imageAPI } from '../services/imageApi';
 
 const Tracks: React.FC = () => {
   const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState<'all' | 'street' | 'permanent'>('all');
+  const [trackImages, setTrackImages] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
 
   const tracks = [
     {
@@ -18,7 +21,6 @@ const Tracks: React.FC = () => {
       lapRecord: '1:14.260',
       recordHolder: 'Lewis Hamilton',
       drsZones: 1,
-      image: 'https://images.pexels.com/photos/8962877/pexels-photo-8962877.jpeg',
       turns: 19,
       type: 'Street Circuit',
       firstGP: 1950,
@@ -35,7 +37,6 @@ const Tracks: React.FC = () => {
       lapRecord: '1:27.097',
       recordHolder: 'Max Verstappen',
       drsZones: 2,
-      image: 'https://images.pexels.com/photos/8962877/pexels-photo-8962877.jpeg',
       turns: 18,
       type: 'Permanent Circuit',
       firstGP: 1950,
@@ -52,7 +53,6 @@ const Tracks: React.FC = () => {
       lapRecord: '1:46.286',
       recordHolder: 'Valtteri Bottas',
       drsZones: 3,
-      image: 'https://images.pexels.com/photos/8962877/pexels-photo-8962877.jpeg',
       turns: 20,
       type: 'Permanent Circuit',
       firstGP: 1950,
@@ -69,7 +69,6 @@ const Tracks: React.FC = () => {
       lapRecord: '1:30.983',
       recordHolder: 'Lewis Hamilton',
       drsZones: 2,
-      image: 'https://images.pexels.com/photos/8962877/pexels-photo-8962877.jpeg',
       turns: 18,
       type: 'Permanent Circuit',
       firstGP: 1987,
@@ -86,7 +85,6 @@ const Tracks: React.FC = () => {
       lapRecord: '1:10.540',
       recordHolder: 'Valtteri Bottas',
       drsZones: 2,
-      image: 'https://images.pexels.com/photos/8962877/pexels-photo-8962877.jpeg',
       turns: 15,
       type: 'Permanent Circuit',
       firstGP: 1973,
@@ -103,14 +101,106 @@ const Tracks: React.FC = () => {
       lapRecord: '1:35.490',
       recordHolder: 'Oscar Piastri',
       drsZones: 3,
-      image: 'https://images.pexels.com/photos/8962877/pexels-photo-8962877.jpeg',
       turns: 17,
       type: 'Street Circuit',
       firstGP: 2023,
       difficulty: 'Medium',
       characteristics: ['Night race', 'Long straights', 'Entertainment capital']
+    },
+    {
+      id: '7',
+      name: 'Circuit de Barcelona-Catalunya',
+      location: 'Barcelona, Spain',
+      country: 'Spain',
+      flag: '🇪🇸',
+      length: '4.675 km',
+      lapRecord: '1:18.149',
+      recordHolder: 'Max Verstappen',
+      drsZones: 2,
+      turns: 16,
+      type: 'Permanent Circuit',
+      firstGP: 1991,
+      difficulty: 'Medium',
+      characteristics: ['Technical', 'Testing venue', 'Overtaking challenges']
+    },
+    {
+      id: '8',
+      name: 'Hungaroring',
+      location: 'Budapest, Hungary',
+      country: 'Hungary',
+      flag: '🇭🇺',
+      length: '4.381 km',
+      lapRecord: '1:16.627',
+      recordHolder: 'Lewis Hamilton',
+      drsZones: 1,
+      turns: 14,
+      type: 'Permanent Circuit',
+      firstGP: 1986,
+      difficulty: 'Medium',
+      characteristics: ['Twisty', 'Monaco without walls', 'Strategy crucial']
+    },
+    {
+      id: '9',
+      name: 'Monza Circuit',
+      location: 'Monza, Italy',
+      country: 'Italy',
+      flag: '🇮🇹',
+      length: '5.793 km',
+      lapRecord: '1:21.046',
+      recordHolder: 'Rubens Barrichello',
+      drsZones: 3,
+      turns: 11,
+      type: 'Permanent Circuit',
+      firstGP: 1950,
+      difficulty: 'Medium',
+      characteristics: ['Temple of Speed', 'Low downforce', 'Slipstream battles']
+    },
+    {
+      id: '10',
+      name: 'Marina Bay Street Circuit',
+      location: 'Singapore',
+      country: 'Singapore',
+      flag: '🇸🇬',
+      length: '5.063 km',
+      lapRecord: '1:35.867',
+      recordHolder: 'Kevin Magnussen',
+      drsZones: 3,
+      turns: 23,
+      type: 'Street Circuit',
+      firstGP: 2008,
+      difficulty: 'High',
+      characteristics: ['Night race', 'Humid conditions', 'Bumpy surface']
     }
   ];
+
+  useEffect(() => {
+    const loadTrackImages = async () => {
+      setLoading(true);
+      const imagePromises = tracks.map(async (track) => {
+        try {
+          const image = await imageAPI.getTrackImage(track.name);
+          return { [track.name]: image };
+        } catch (error) {
+          console.warn(`Failed to load image for ${track.name}:`, error);
+          return { [track.name]: 'https://images.pexels.com/photos/8962877/pexels-photo-8962877.jpeg?auto=compress&cs=tinysrgb&w=1200' };
+        }
+      });
+
+      const results = await Promise.allSettled(imagePromises);
+      const imageMap: Record<string, string> = {};
+      
+      results.forEach((result) => {
+        if (result.status === 'fulfilled') {
+          Object.assign(imageMap, result.value);
+        }
+      });
+
+      setTrackImages(imageMap);
+      setLoading(false);
+    };
+
+    loadTrackImages();
+  }, []);
 
   const filteredTracks = tracks.filter(track => {
     if (selectedType === 'all') return true;
@@ -131,13 +221,27 @@ const Tracks: React.FC = () => {
   };
 
   const handleExploreTrack = (trackId: string) => {
-    // Navigate to track detail page (to be implemented)
     console.log('Explore track:', trackId);
   };
 
   const handleViewRaceHistory = (trackName: string) => {
     navigate(`/calendar?track=${encodeURIComponent(trackName)}`);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full mx-auto mb-4"
+          />
+          <p className="text-gray-600 dark:text-gray-300">Loading F1 circuits with real images...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 py-8">
@@ -232,12 +336,12 @@ const Tracks: React.FC = () => {
               {/* Track Image */}
               <div className="relative h-48 overflow-hidden">
                 <img
-                  src={track.image}
+                  src={trackImages[track.name] || 'https://images.pexels.com/photos/8962877/pexels-photo-8962877.jpeg?auto=compress&cs=tinysrgb&w=1200'}
                   alt={track.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    target.src = 'https://images.pexels.com/photos/8962877/pexels-photo-8962877.jpeg';
+                    target.src = 'https://images.pexels.com/photos/8962877/pexels-photo-8962877.jpeg?auto=compress&cs=tinysrgb&w=1200';
                   }}
                 />
                 <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">

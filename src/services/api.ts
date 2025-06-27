@@ -1,3 +1,5 @@
+import { imageAPI } from './imageApi';
+
 const API_KEYS = {
   HYPRACE: 'b2d076e455mshfe347f249e99333p1ac10ejsn88a8545faaf6',
   F1_LIVE_PULSE: 'b2d076e455mshfe347f249e99333p1ac10ejsn88a8545faaf6',
@@ -71,7 +73,7 @@ export interface Race {
 
 class F1API {
   private driverImages: Map<string, string> = new Map();
-  private imageCache: Map<string, string[]> = new Map();
+  private trackImages: Map<string, string> = new Map();
 
   private async fetchWithHeaders(url: string, apiType: keyof typeof API_KEYS) {
     const headers: Record<string, string> = {
@@ -99,62 +101,6 @@ class F1API {
     }
     
     return this.getMockData(apiType);
-  }
-
-  private async fetchGettyImages(query: string): Promise<string[]> {
-    if (this.imageCache.has(query)) {
-      return this.imageCache.get(query)!;
-    }
-
-    try {
-      const formData = new URLSearchParams();
-      formData.append('query', `${query} Formula 1 racing driver portrait`);
-      formData.append('number_of_images', '10');
-      formData.append('country', 'us');
-      formData.append('language', 'en');
-
-      const response = await fetch(`${BASE_URLS.GETTY_IMAGES}/search`, {
-        method: 'POST',
-        headers: {
-          'X-Rapidapi-Key': API_KEYS.GETTY_IMAGES,
-          'X-Rapidapi-Host': 'gettyimagesraygorodskijv1.p.rapidapi.com',
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: formData
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const images = data.images?.map((img: any) => img.url) || [];
-        this.imageCache.set(query, images);
-        return images;
-      }
-    } catch (error) {
-      console.warn(`Getty Images API error for ${query}:`, error);
-    }
-
-    // Fallback to high-quality F1 stock images
-    const fallbackImages = [
-      'https://images.pexels.com/photos/12799780/pexels-photo-12799780.jpeg',
-      'https://images.pexels.com/photos/8813455/pexels-photo-8813455.jpeg',
-      'https://images.pexels.com/photos/8962877/pexels-photo-8962877.jpeg',
-      'https://images.pexels.com/photos/163407/f-1-racing-car-vehicle-163407.jpeg',
-      'https://images.pexels.com/photos/1007410/pexels-photo-1007410.jpeg'
-    ];
-    
-    this.imageCache.set(query, fallbackImages);
-    return fallbackImages;
-  }
-
-  private async getDriverImage(driverName: string): Promise<string> {
-    if (this.driverImages.has(driverName)) {
-      return this.driverImages.get(driverName)!;
-    }
-
-    const images = await this.fetchGettyImages(driverName);
-    const image = images[Math.floor(Math.random() * images.length)];
-    this.driverImages.set(driverName, image);
-    return image;
   }
 
   private getMockData(apiType: keyof typeof API_KEYS) {
@@ -209,22 +155,17 @@ class F1API {
       { name: 'Nyck de Vries', team: 'AlphaTauri (Former)', nationality: 'Netherlands', points: 0, position: 32, wins: 0, podiums: 0, poles: 0, fastestLaps: 0, flag: '🇳🇱', age: 29, championships: 0, careerWins: 0, careerPodiums: 0, experience: 68, racecraft: 72, qualifying: 74, consistency: 70, speed: 76, pressure: 68 },
       { name: 'Antonio Giovinazzi', team: 'Ferrari (Reserve)', nationality: 'Italy', points: 0, position: 33, wins: 0, podiums: 0, poles: 0, fastestLaps: 0, flag: '🇮🇹', age: 30, championships: 0, careerWins: 0, careerPodiums: 0, experience: 74, racecraft: 76, qualifying: 72, consistency: 74, speed: 76, pressure: 72 },
       { name: 'Robert Kubica', team: 'Alfa Romeo (Reserve)', nationality: 'Poland', points: 0, position: 34, wins: 1, podiums: 12, poles: 1, fastestLaps: 1, flag: '🇵🇱', age: 39, championships: 0, careerWins: 1, careerPodiums: 12, experience: 86, racecraft: 84, qualifying: 80, consistency: 82, speed: 82, pressure: 86 },
-      { name: 'Stoffel Vandoorne', team: 'Mercedes (Reserve)', nationality: 'Belgium', points: 0, position: 35, wins: 0, podiums: 1, poles: 0, fastestLaps: 0, flag: '🇧🇪', age: 32, championships: 0, careerWins: 0, careerPodiums: 1, experience: 76, racecraft: 78, qualifying: 80, consistency: 78, speed: 80, pressure: 76 },
-      { name: 'Pascal Wehrlein', team: 'Porsche (Formula E)', nationality: 'Germany', points: 0, position: 36, wins: 0, podiums: 0, poles: 0, fastestLaps: 0, flag: '🇩🇪', age: 30, championships: 0, careerWins: 0, careerPodiums: 0, experience: 72, racecraft: 74, qualifying: 76, consistency: 74, speed: 76, pressure: 72 },
-      { name: 'Rio Haryanto', team: 'Manor (Former)', nationality: 'Indonesia', points: 0, position: 37, wins: 0, podiums: 0, poles: 0, fastestLaps: 0, flag: '🇮🇩', age: 31, championships: 0, careerWins: 0, careerPodiums: 0, experience: 68, racecraft: 70, qualifying: 68, consistency: 70, speed: 72, pressure: 68 },
-      { name: 'Marcus Ericsson', team: 'Sauber (Former)', nationality: 'Sweden', points: 0, position: 38, wins: 0, podiums: 0, poles: 0, fastestLaps: 0, flag: '🇸🇪', age: 34, championships: 0, careerWins: 0, careerPodiums: 0, experience: 78, racecraft: 76, qualifying: 74, consistency: 78, speed: 74, pressure: 76 },
-      { name: 'Jolyon Palmer', team: 'Renault (Former)', nationality: 'United Kingdom', points: 0, position: 39, wins: 0, podiums: 0, poles: 0, fastestLaps: 0, flag: '🇬🇧', age: 33, championships: 0, careerWins: 0, careerPodiums: 0, experience: 72, racecraft: 70, qualifying: 68, consistency: 70, speed: 72, pressure: 68 },
-      { name: 'Will Stevens', team: 'Manor (Former)', nationality: 'United Kingdom', points: 0, position: 40, wins: 0, podiums: 0, poles: 0, fastestLaps: 0, flag: '🇬🇧', age: 32, championships: 0, careerWins: 0, careerPodiums: 0, experience: 66, racecraft: 68, qualifying: 66, consistency: 68, speed: 70, pressure: 66 },
-      { name: 'Jean-Eric Vergne', team: 'Toro Rosso (Former)', nationality: 'France', points: 0, position: 41, wins: 0, podiums: 0, poles: 0, fastestLaps: 0, flag: '🇫🇷', age: 34, championships: 0, careerWins: 0, careerPodiums: 0, experience: 80, racecraft: 82, qualifying: 78, consistency: 80, speed: 80, pressure: 78 },
-      { name: 'Romain Grosjean', team: 'Haas (Former)', nationality: 'France', points: 0, position: 42, wins: 0, podiums: 10, poles: 0, fastestLaps: 0, flag: '🇫🇷', age: 38, championships: 0, careerWins: 0, careerPodiums: 10, experience: 84, racecraft: 80, qualifying: 78, consistency: 74, speed: 82, pressure: 76 },
-      { name: 'Pastor Maldonado', team: 'Williams (Former)', nationality: 'Venezuela', points: 0, position: 43, wins: 1, podiums: 1, poles: 1, fastestLaps: 0, flag: '🇻🇪', age: 39, championships: 0, careerWins: 1, careerPodiums: 1, experience: 76, racecraft: 72, qualifying: 76, consistency: 68, speed: 78, pressure: 70 },
-      { name: 'Kamui Kobayashi', team: 'Sauber (Former)', nationality: 'Japan', points: 0, position: 44, wins: 0, podiums: 1, poles: 0, fastestLaps: 1, flag: '🇯🇵', age: 38, championships: 0, careerWins: 0, careerPodiums: 1, experience: 78, racecraft: 82, qualifying: 76, consistency: 76, speed: 84, pressure: 78 },
-      { name: 'Vitaly Petrov', team: 'Renault (Former)', nationality: 'Russia', points: 0, position: 45, wins: 0, podiums: 3, poles: 0, fastestLaps: 0, flag: '🇷🇺', age: 40, championships: 0, careerWins: 0, careerPodiums: 3, experience: 74, racecraft: 76, qualifying: 72, consistency: 74, speed: 76, pressure: 72 }
+      { name: 'Stoffel Vandoorne', team: 'Mercedes (Reserve)', nationality: 'Belgium', points: 0, position: 35, wins: 0, podiums: 1, poles: 0, fastestLaps: 0, flag: '🇧🇪', age: 32, championships: 0, careerWins: 0, careerPodiums: 1, experience: 76, racecraft: 78, qualifying: 80, consistency: 78, speed: 80, pressure: 76 }
     ];
 
-    // Add images to drivers
+    // Add real images to drivers using the image API
     for (const driver of drivers) {
-      driver.image = await this.getDriverImage(driver.name);
+      try {
+        driver.image = await imageAPI.getDriverImage(driver.name);
+      } catch (error) {
+        console.warn(`Failed to load image for ${driver.name}:`, error);
+        driver.image = 'https://images.pexels.com/photos/12799780/pexels-photo-12799780.jpeg?auto=compress&cs=tinysrgb&w=800';
+      }
     }
 
     return drivers;
@@ -385,45 +326,87 @@ class F1API {
     ];
   }
 
-  private getMockRaces(): Race[] {
-    return [
+  private async getMockRaces(): Promise<Race[]> {
+    const races = [
       {
         id: '1',
         name: 'Abu Dhabi Grand Prix',
         location: 'Yas Marina Circuit',
         date: '2024-12-08',
-        status: 'upcoming',
-        circuit: 'https://images.pexels.com/photos/8962877/pexels-photo-8962877.jpeg',
-        weather: 'Clear, 28°C',
+        status: 'upcoming' as const,
         laps: 58,
         distance: '305.355 km',
-        lapRecord: '1:26.103'
+        lapRecord: '1:26.103',
+        weather: 'Clear, 28°C'
       },
       {
         id: '2',
         name: 'Las Vegas Grand Prix',
         location: 'Las Vegas Strip Circuit',
         date: '2024-11-23',
-        status: 'completed',
-        circuit: 'https://images.pexels.com/photos/8962877/pexels-photo-8962877.jpeg',
-        weather: 'Clear, 15°C',
+        status: 'completed' as const,
         laps: 50,
         distance: '305.354 km',
-        lapRecord: '1:35.490'
+        lapRecord: '1:35.490',
+        weather: 'Clear, 15°C'
       },
       {
         id: '3',
         name: 'Brazilian Grand Prix',
         location: 'Interlagos',
         date: '2024-11-03',
-        status: 'completed',
-        circuit: 'https://images.pexels.com/photos/8962877/pexels-photo-8962877.jpeg',
-        weather: 'Partly cloudy, 26°C',
+        status: 'completed' as const,
         laps: 71,
         distance: '305.909 km',
-        lapRecord: '1:10.540'
+        lapRecord: '1:10.540',
+        weather: 'Partly cloudy, 26°C'
+      },
+      {
+        id: '4',
+        name: 'Monaco Grand Prix',
+        location: 'Circuit de Monaco',
+        date: '2024-05-26',
+        status: 'completed' as const,
+        laps: 78,
+        distance: '260.286 km',
+        lapRecord: '1:14.260',
+        weather: 'Sunny, 24°C'
+      },
+      {
+        id: '5',
+        name: 'British Grand Prix',
+        location: 'Silverstone Circuit',
+        date: '2024-07-07',
+        status: 'completed' as const,
+        laps: 52,
+        distance: '306.198 km',
+        lapRecord: '1:27.097',
+        weather: 'Overcast, 18°C'
+      },
+      {
+        id: '6',
+        name: 'Belgian Grand Prix',
+        location: 'Spa-Francorchamps',
+        date: '2024-07-28',
+        status: 'completed' as const,
+        laps: 44,
+        distance: '308.052 km',
+        lapRecord: '1:46.286',
+        weather: 'Mixed conditions, 16°C'
       }
     ];
+
+    // Add real track images
+    for (const race of races) {
+      try {
+        race.circuit = await imageAPI.getTrackImage(race.name);
+      } catch (error) {
+        console.warn(`Failed to load track image for ${race.name}:`, error);
+        race.circuit = 'https://images.pexels.com/photos/8962877/pexels-photo-8962877.jpeg?auto=compress&cs=tinysrgb&w=1200';
+      }
+    }
+
+    return races;
   }
 
   async getDrivers(): Promise<Driver[]> {
@@ -444,8 +427,18 @@ class F1API {
     return { drivers, constructors };
   }
 
-  async getDriverImages(query: string) {
-    return await this.fetchGettyImages(query);
+  // Preload images for better performance
+  async preloadImages(): Promise<void> {
+    const drivers = await this.getMockDrivers();
+    const races = await this.getMockRaces();
+    
+    const driverNames = drivers.map(d => d.name);
+    const trackNames = races.map(r => r.name);
+    
+    await Promise.allSettled([
+      imageAPI.preloadDriverImages(driverNames),
+      imageAPI.preloadTrackImages(trackNames)
+    ]);
   }
 }
 
