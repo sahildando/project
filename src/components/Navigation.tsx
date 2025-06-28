@@ -50,14 +50,18 @@ const Navigation: React.FC = () => {
             className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
           >
             <motion.div 
-              className="w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center"
-              whileHover={{ scale: 1.1 }}
+              className="h-8"
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <span className="text-white font-bold text-sm">F1</span>
+              <img 
+                src="/images/image.png" 
+                alt="Formula 1" 
+                className="h-full w-auto object-contain"
+              />
             </motion.div>
             <span className="text-xl font-bold bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent">
-              F1LiveX
+              LiveX
             </span>
           </button>
 
