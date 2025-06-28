@@ -174,25 +174,20 @@ const Drivers: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700"
             >
-              {/* Driver Image */}
-              <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
-                <img
-                  src={driver.image}
-                  alt={driver.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = 'https://images.pexels.com/photos/12799780/pexels-photo-12799780.jpeg';
-                  }}
-                />
-                <div className="absolute top-4 right-4 bg-white dark:bg-gray-800 rounded-full p-2 shadow-md">
-                  <span className="text-2xl">{driver.flag}</span>
-                </div>
-                <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
-                  #{driver.position}
+              {/* Driver Header */}
+              <div className="relative h-24 bg-gradient-to-br from-red-500 to-red-600 p-4">
+                <div className="flex items-center justify-between h-full">
+                  <div className="text-white">
+                    <div className="text-2xl mb-1">{driver.flag}</div>
+                  </div>
+                  <div className="bg-white/20 backdrop-blur-sm rounded-full p-2">
+                    <span className="text-white font-bold text-lg">
+                      #{driver.position}
+                    </span>
+                  </div>
                 </div>
                 {driver.championships > 0 && (
-                  <div className="absolute top-4 left-4 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                  <div className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-bold">
                     {driver.championships}x WDC
                   </div>
                 )}

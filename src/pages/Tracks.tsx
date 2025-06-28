@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Clock, Zap, Eye, Calendar, Trophy, Flag } from 'lucide-react';
-import { imageAPI } from '../services/imageApi';
+import { MapPin, Clock, Zap, Eye, Calendar, Trophy, Flag, Car } from 'lucide-react';
 
 const Tracks: React.FC = () => {
   const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState<'all' | 'street' | 'permanent'>('all');
-  const [trackImages, setTrackImages] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(true);
 
   const tracks = [
     {
@@ -173,35 +170,6 @@ const Tracks: React.FC = () => {
     }
   ];
 
-  useEffect(() => {
-    const loadTrackImages = async () => {
-      setLoading(true);
-      const imagePromises = tracks.map(async (track) => {
-        try {
-          const image = await imageAPI.getTrackImage(track.name);
-          return { [track.name]: image };
-        } catch (error) {
-          console.warn(`Failed to load image for ${track.name}:`, error);
-          return { [track.name]: 'https://images.pexels.com/photos/8962877/pexels-photo-8962877.jpeg?auto=compress&cs=tinysrgb&w=1200' };
-        }
-      });
-
-      const results = await Promise.allSettled(imagePromises);
-      const imageMap: Record<string, string> = {};
-      
-      results.forEach((result) => {
-        if (result.status === 'fulfilled') {
-          Object.assign(imageMap, result.value);
-        }
-      });
-
-      setTrackImages(imageMap);
-      setLoading(false);
-    };
-
-    loadTrackImages();
-  }, []);
-
   const filteredTracks = tracks.filter(track => {
     if (selectedType === 'all') return true;
     return selectedType === 'street' ? track.type === 'Street Circuit' : track.type === 'Permanent Circuit';
@@ -227,21 +195,6 @@ const Tracks: React.FC = () => {
   const handleViewRaceHistory = (trackName: string) => {
     navigate(`/calendar?track=${encodeURIComponent(trackName)}`);
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full mx-auto mb-4"
-          />
-          <p className="text-gray-600 dark:text-gray-300">Loading F1 circuits with real images...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 py-8">
@@ -333,25 +286,21 @@ const Tracks: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700"
             >
-              {/* Track Image */}
-              <div className="relative h-48 overflow-hidden">
-                <img
-                  src={trackImages[track.name] || 'https://images.pexels.com/photos/8962877/pexels-photo-8962877.jpeg?auto=compress&cs=tinysrgb&w=1200'}
-                  alt={track.name}
-                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = 'https://images.pexels.com/photos/8962877/pexels-photo-8962877.jpeg?auto=compress&cs=tinysrgb&w=1200';
-                  }}
-                />
-                <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
-                  {track.type}
+              {/* Track Header */}
+              <div className="relative h-24 bg-gradient-to-br from-blue-500 to-blue-600 p-4">
+                <div className="flex items-center justify-between h-full">
+                  <div className="text-white">
+                    <div className="text-2xl mb-1">{track.flag}</div>
+                  </div>
+                  <div className="bg-white/20 backdrop-blur-sm rounded-full p-2">
+                    <Car size={20} className="text-white" />
+                  </div>
                 </div>
-                <div className="absolute top-4 left-4 bg-white/90 dark:bg-gray-800/90 rounded-full p-2">
-                  <span className="text-2xl">{track.flag}</span>
-                </div>
-                <div className={`absolute bottom-4 right-4 px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(track.difficulty)}`}>
+                <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(track.difficulty)}`}>
                   {track.difficulty}
+                </div>
+                <div className="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-1 rounded-full text-xs font-medium">
+                  {track.type}
                 </div>
               </div>
 
