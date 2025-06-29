@@ -8,6 +8,7 @@ import Constructors from './pages/Constructors';
 import Standings from './pages/Standings';
 import Calendar from './pages/Calendar';
 import Tracks from './pages/Tracks';
+import Track3D from './pages/Track3D';
 import Compare from './pages/Compare';
 import TechCenter from './pages/TechCenter';
 import AIZone from './pages/AIZone';
@@ -25,6 +26,7 @@ function App() {
             <Route path="/standings" element={<Standings />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/tracks" element={<Tracks />} />
+            <Route path="/tracks/3d" element={<Track3D />} />
             <Route path="/compare" element={<Compare />} />
             <Route path="/tech" element={<TechCenter />} />
             <Route path="/ai" element={<AIZone />} />

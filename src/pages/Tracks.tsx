@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Clock, Zap, Eye, Calendar, Trophy, Flag, Car } from 'lucide-react';
+import { MapPin, Clock, Zap, Eye, Calendar, Trophy, Flag, Car, Cube } from 'lucide-react';
 
 const Tracks: React.FC = () => {
   const navigate = useNavigate();
@@ -196,6 +196,10 @@ const Tracks: React.FC = () => {
     navigate(`/calendar?track=${encodeURIComponent(trackName)}`);
   };
 
+  const handleView3D = () => {
+    navigate('/tracks/3d');
+  };
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -212,6 +216,30 @@ const Tracks: React.FC = () => {
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Explore iconic Formula 1 tracks with detailed layouts, statistics, and racing history
           </p>
+        </motion.div>
+
+        {/* 3D Visualization CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="bg-gradient-to-r from-red-600 to-red-700 rounded-xl p-8 mb-8 text-white text-center"
+        >
+          <Cube size={48} className="mx-auto mb-4" />
+          <h2 className="text-2xl font-bold mb-4">Experience Tracks in 3D</h2>
+          <p className="text-red-100 mb-6 max-w-2xl mx-auto">
+            Explore Formula 1 circuits like never before with our interactive 3D visualization. 
+            See elevation changes, corner details, DRS zones, and facilities in stunning detail.
+          </p>
+          <motion.button
+            onClick={handleView3D}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="bg-white text-red-600 px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition-colors flex items-center mx-auto"
+          >
+            <Cube size={20} className="mr-2" />
+            Launch 3D Track Viewer
+          </motion.button>
         </motion.div>
 
         {/* Filter Tabs */}
@@ -425,6 +453,15 @@ const Tracks: React.FC = () => {
           className="mt-12 text-center"
         >
           <div className="flex flex-wrap justify-center gap-4">
+            <motion.button
+              onClick={handleView3D}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center"
+            >
+              <Cube size={20} className="mr-2" />
+              3D Track Viewer
+            </motion.button>
             <motion.button
               onClick={() => navigate('/calendar')}
               whileHover={{ scale: 1.02 }}
