@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Clock, Zap, Eye, Calendar, Trophy, Flag, Car, Cube } from 'lucide-react';
+import { MapPin, Clock, Zap, Eye, Calendar, Trophy, Flag, Car, Cuboid as Cube } from 'lucide-react';
 
 const Tracks: React.FC = () => {
   const navigate = useNavigate();
